@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "548379745638",
+    "project_id": "sapp-50b98",
+    "storage_bucket": "sapp-50b98.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:548379745638:android:adebdf2b341f64e6ae3ca7",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhiIbe4if7pQqt7lXajG01M-9mWLo5qmQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,215 @@
+name: app
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  firebase_core: ^4.4.0
+  cloud_firestore: ^6.1.2
+  firebase_auth: ^6.1.4
+  http: ^1.6.0
+  provider: ^6.1.5+1
+  flutter_launcher_icons: ^0.14.4
+  image_picker: ^1.2.1
+  intl: ^0.20.2
+
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  fake_cloud_firestore: ^4.0.1
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/image/icon.png"
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+  assets:
+    - assets/categories/deals/2.webp
+    - assets/categories/deals/3.jpg
+    - assets/image/banner1.jpeg
+    - assets/image/banner2.jpeg
+    - assets/image/banner3.jpeg
+    - assets/image/banner4.jpeg
+    - assets/image/banner5.jpeg
+    - assets/image/banner6.jpeg
+    - assets/image/banner7.jpeg
+    - assets/image/banner8.jpeg
+    - assets/image/banner9.jpeg
+    - assets/image/banner10.jpeg
+    - assets/image/banner11.jpeg
+    - assets/image/wbanner1.jpeg
+    - assets/image/wbanner2.jpeg
+    - assets/image/wbanner3.jpeg
+    - assets/image/wbanner4.jpeg
+    - assets/image/icon.png
+    - assets/image/fashion.webp
+    - assets/image/travel.webp
+    - assets/image/mobile.webp
+    - assets/image/electronic.webp
+    - assets/image/home.webp
+    - assets/image/bills&recharges.png
+    - assets/image/beauty.webp
+    - assets/image/books.webp
+    - assets/image/star.webp
+    - assets/image/toys.webp
+    - assets/image/Banner1.jpg
+    - assets/image/Banner2.webp
+    - assets/image/Banner3.webp
+    - assets/image/Banner4.webp
+    - assets/image/Banner5.jpg
+    - assets/image/Banner6.webp
+    - assets/image/Banner7.webp
+    - assets/image/Banner8.jpg
+    - assets/image/Banner9.webp
+    - assets/categories/account&help.png
+    - assets/categories/yourthings.webp
+    - assets/categories/business purchases.jpg
+    - assets/categories/gift.webp
+    - assets/categories/travel&auto.png
+    - assets/categories/pharmacy.webp
+    - assets/categories/geroceries&pet.png
+    - assets/image/daily_needs.webp
+    - assets/categories/Appliances.jpg
+    -  assets/categories/mobile/3.jpg
+    - assets/categories/mobile/1.jpg
+    -  assets/categories/mobile/2.jpg
+    -   assets/categories/mobile/3.jpg
+    -   assets/categories/mobile/4.jpg
+    -   assets/categories/mobile/5.jpg
+    -   assets/categories/mobile/6.jpg
+    -   assets/categories/mobile/7.jpg
+    -   assets/categories/mobile/8.jpg
+    -   assets/categories/mobile/9.jpg
+    -   assets/categories/mobile/11.webp
+    -  assets/categories/mobile/10.jpg
+    -  assets/categories/mobile/12.jpg
+    -  assets/categories/fashion/2.webp
+    -  assets/categories/fashion/1.jpg
+    -  assets/categories/fashion/3.webp
+    - assets/categories/fashion/4.webp
+    - assets/categories/fashion/5.webp
+    - assets/categories/fashion/6.webp
+    - assets/categories/fashion/7.webp
+    - assets/categories/fashion/8.webp
+    - assets/categories/fashion/9.webp
+    - assets/categories/home/1.jpg
+    - assets/categories/home/2.webp
+    - assets/categories/home/2.jpg
+    - assets/categories/home/3.webp
+    - assets/categories/home/5.webp
+    - assets/categories/home/pet_supplies.png
+    - assets/categories/your Things/customer_service.webp
+    - assets/categories/home/4.webp
+    - assets/categories/your Things/your_Orders.png
+    - assets/categories/your Things/buy_again.avif
+    - assets/categories/your Things/account.webp
+    - assets/categories/your Things/list.webp
+    - assets/categories/your Things/signout.webp
+    - assets/categories/your Things/transation.webp
+    - assets/image/cart.jpeg
+    - assets/categories/your Things/switch.png
+    - assets/categories/2.webp
+    - assets/categories/home/audible.jpg
+    - assets/categories/pharmacy/health_household.jpg
+    - assets/categories/pharmacy/pharmacy.avif
+    - assets/categories/pharmacy/device.webp
+    - assets/categories/travel/flight.webp
+    - assets/categories/travel/hotel.webp
+    - assets/categories/travel/bus.webp
+    - assets/categories/travel/train.webp
+    - assets/categories/travel/metro.jpg
+    - assets/categories/travel/fastag.webp
+    - assets/categories/sport&fitness.webp
+    - assets/categories/fashion/9.webp
+    - assets/categories/travel/car&bike.webp
+    - assets/categories/travel/auto_insurance.webp
+    - assets/categories/fitness/fitness.webp
+    - assets/categories/fitness/sports_clothing.webp
+    - assets/categories/fitness/sports_shoes.webp
+    - assets/categories/fitness/health_drinks.webp
+    - assets/categories/fitness/gift_card.webp
+    - assets/categories/fitness/giftfinder.jpg
+    - assets/categories/fitness/handicrafts.jpg
+    - assets/categories/fitness/support_small.webp
+    - assets/categories/mobile/6.jpg
+    - assets/categories/kides/baby.webp
+    - assets/categories/kides/toy&game.webp
+
+
+
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
