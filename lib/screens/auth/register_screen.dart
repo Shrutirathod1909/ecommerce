@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:app/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final VoidCallback onSuccess;
+  final VoidCallback onSuccess; // ✅ Add this
 
   const RegisterScreen({super.key, required this.onSuccess});
 
@@ -13,7 +13,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
@@ -27,60 +26,53 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool isLoading = false;
 
   // ================= REGISTER API =================
+  Future<void> registerUser() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => isLoading = true);
 
- Future<void> registerUser() async {
+    var url = Uri.parse("http://192.168.1.39/ecommerce/register.php");
 
-  if (!_formKey.currentState!.validate()) return;
-
-  setState(() => isLoading = true);
-
-  var url = Uri.parse("http://192.168.1.39/ecommerce/register.php");
-
-  try {
-
-    var response = await http.post(
-      url,
-      body: {
-        "fullname": nameController.text.trim(),
-        "email": emailController.text.trim(),
-        "phone": mobileController.text.trim(),
-        "password": passwordController.text.trim(),
-      },
-    );
-
-    print(response.body);
-
-    var data = jsonDecode(response.body);
-
-    if (data["status"] == "success") {
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Registration Successful")),
+    try {
+      var response = await http.post(
+        url,
+        body: {
+          "fullname": nameController.text.trim(),
+          "email": emailController.text.trim(),
+          "phone": mobileController.text.trim(),
+          "password": passwordController.text.trim(),
+        },
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProfileScreen(
-            name: nameController.text.trim(),
-          ),
-        ),
-      );
+      var data = jsonDecode(response.body);
 
-    } else {
+      setState(() => isLoading = false);
+
+      if (data["status"] == "success") {
+        // ✅ Save login state
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool("isLoggedIn", true);
+        await prefs.setString("userName", nameController.text.trim());
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration Successful")),
+        );
+
+        // ✅ Call onSuccess callback instead of navigating directly
+        widget.onSuccess();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"] ?? "Registration Failed")),
+        );
+      }
+    } catch (e) {
+      setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data["message"])),
+        const SnackBar(content: Text("Server Error")),
       );
     }
-
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Server Error")),
-    );
   }
 
-  setState(() => isLoading = false);
-} @override
+  @override
   void dispose() {
     nameController.dispose();
     mobileController.dispose();
@@ -91,10 +83,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // ================= UI =================
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -111,55 +101,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   const Center(
                     child: Icon(Icons.store, size: 50, color: Colors.orange),
                   ),
-
                   const SizedBox(height: 20),
-
                   const Text(
                     "Create Account",
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-
                   const SizedBox(height: 20),
 
-                  buildTextField("Your Name", nameController, validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Name is required";
-                    }
-                    if (value.length < 3) {
-                      return "Minimum 3 characters required";
-                    }
-                    return null;
-                  }),
+                  buildTextField(
+                    "Your Name",
+                    nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return "Name is required";
+                      if (value.length < 3) return "Minimum 3 characters required";
+                      return null;
+                    },
+                  ),
 
-                  buildTextField("Mobile Number", mobileController,
-                      keyboard: TextInputType.phone,
-                      validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Mobile number required";
-                    }
-                    if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-                      return "Enter valid 10-digit mobile";
-                    }
-                    return null;
-                  }),
+                  buildTextField(
+                    "Mobile Number",
+                    mobileController,
+                    keyboard: TextInputType.phone,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return "Mobile number required";
+                      if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) return "Enter valid 10-digit mobile";
+                      return null;
+                    },
+                  ),
 
-                  buildTextField("Email", emailController,
-                      keyboard: TextInputType.emailAddress,
-                      validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Email required";
-                    }
-                    if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                      return "Enter valid email";
-                    }
-                    return null;
-                  }),
+                  buildTextField(
+                    "Email",
+                    emailController,
+                    keyboard: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return "Email required";
+                      if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) return "Enter valid email";
+                      return null;
+                    },
+                  ),
 
                   buildPasswordField(
                     "Password",
@@ -174,15 +156,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     _obscureConfirmPassword,
                     () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                     validator: (value) {
-                      if (value != passwordController.text) {
-                        return "Passwords do not match";
-                      }
+                      if (value != passwordController.text) return "Passwords do not match";
                       return null;
                     },
                   ),
 
                   const SizedBox(height: 20),
-
                   SizedBox(
                     width: double.infinity,
                     height: 45,
@@ -210,7 +189,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // ================= REUSABLE WIDGETS =================
-
   Widget buildTextField(String label, TextEditingController controller,
       {TextInputType keyboard = TextInputType.text,
       String? Function(String?)? validator}) {
@@ -225,9 +203,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             controller: controller,
             keyboardType: keyboard,
             validator: validator,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(border: OutlineInputBorder()),
           ),
         ],
       ),
@@ -252,19 +228,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             obscureText: obscure,
             validator: validator ??
                 (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Password required";
-                  }
-                  if (value.length < 6) {
-                    return "Minimum 6 characters";
-                  }
+                  if (value == null || value.isEmpty) return "Password required";
+                  if (value.length < 6) return "Minimum 6 characters";
                   return null;
                 },
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
               suffixIcon: IconButton(
-                icon: Icon(
-                    obscure ? Icons.visibility_off : Icons.visibility),
+                icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
                 onPressed: toggle,
               ),
             ),

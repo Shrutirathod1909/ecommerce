@@ -1,6 +1,8 @@
 import 'package:app/screens/auth/login_screen.dart';
 import 'package:app/screens/auth/register_screen.dart';
+import 'package:app/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'home_screen.dart'; // 👈 2nd screen
 
 class ShopcartWelcomeScreen extends StatelessWidget {
   const ShopcartWelcomeScreen({super.key});
@@ -100,7 +102,18 @@ class ShopcartWelcomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) =>  RegisterScreen(onSuccess: () {},)),
+                    MaterialPageRoute(
+                      builder: (_) => RegisterScreen(
+                        onSuccess: () {
+                          // ✅ Navigate to HomeScreen after register success
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const HomeScreen()),
+                          );
+                        },
+                      ),
+                    ),
                   );
                 },
                 child: const Text(
@@ -131,7 +144,18 @@ class ShopcartWelcomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) =>  LoginScreen(onSuccess: () {})),
+                    MaterialPageRoute(
+                      builder: (_) => LoginScreen(
+                        onSuccess: () {
+                          // ✅ Navigate to HomeScreen after login success
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>ProfileScreen(name: "name",)),
+                          );
+                        },
+                      ),
+                    ),
                   );
                 },
                 child: const Text(

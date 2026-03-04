@@ -156,17 +156,7 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
 
-      /// 🔻 BOTTOM NAV
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "You"),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
-          BottomNavigationBarItem(icon: Icon(Icons.menu), label: "Menu"),
-        ],
-      ),
-    );
+      );
   }
 
   /// 🔘 Chip Button
@@ -184,6 +174,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+  
 
   /// 📦 Section Widget
   Widget _section({

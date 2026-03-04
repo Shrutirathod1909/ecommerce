@@ -1,5 +1,5 @@
+import 'package:app/screens/WelcomeScreen.dart';
 import 'package:app/screens/cart_screen.dart';
-import 'package:app/screens/WecomeScreen.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'catergories_screen.dart';
