@@ -4,8 +4,13 @@ import 'package:http/http.dart' as http;
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
+  final int userId;
 
-  const ProductDetailScreen({super.key, required this.productId});
+  const ProductDetailScreen({
+    super.key,
+    required this.productId,
+    required this.userId,
+  });
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -16,8 +21,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool isLoading = true;
 
   String imageUrl = "";
+  Future addToCart() async {
 
-  @override
+  var response = await http.post(
+    Uri.parse("http://192.168.1.39/ecommerce/add_to_cart.php"),
+    body: {
+      "userid": widget.userId.toString(),
+      "productid": widget.productId.toString(),
+      "quantity": "1"
+    }
+  );
+
+  var data = json.decode(response.body);
+
+  if(data["success"]){
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Added to Cart"))
+    );
+
+  }else{
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Failed to add cart"))
+    );
+
+  }
+} @override
   void initState() {
     super.initState();
     fetchProduct();
@@ -153,17 +183,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         color: Colors.white,
         child: Row(
           children: [
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow,
-                  padding: const EdgeInsets.all(14),
-                ),
-                onPressed: () {},
-                child: const Text("Add to Cart",
-                    style: TextStyle(color: Colors.black)),
-              ),
-            ),
+        Expanded(
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.yellow,
+      padding: const EdgeInsets.all(14),
+    ),
+    onPressed: (){
+      addToCart();
+    },
+    child: const Text(
+      "Add to Cart",
+      style: TextStyle(color: Colors.black),
+    ),
+  ),
+),
             const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(

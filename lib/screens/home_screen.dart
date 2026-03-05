@@ -68,6 +68,7 @@ import 'package:flutter/material.dart';
 
           _startAutoSlide();
           fetchProducts(); 
+          getCategories();
         }
 
         void _startAutoSlide() {
@@ -91,10 +92,9 @@ import 'package:flutter/material.dart';
      Future<void> fetchProducts() async {
   try {
     var url = Uri.parse("http://192.168.1.39/ecommerce/get_product.php"); 
+
     final response = await http.get(url);
 
-    print("API Response Code: ${response.statusCode}");
-    print("API Response Body: ${response.body}");
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
@@ -118,7 +118,31 @@ import 'package:flutter/material.dart';
     setState(() => isLoadingProducts = false);
     print("Error fetching products: $e");
   }
-}    void dispose() {
+}   Future<void> getCategories() async {
+
+    try {
+
+      final response = await http.get(Uri.parse("http://192.168.1.39/ecommerce/get_categories.php"));
+
+      final data = jsonDecode(response.body);
+
+      if (data["status"] == "success") {
+
+        setState(() {
+          categories = data["categories"];
+        });
+
+      }
+
+    } catch (e) {
+      print(e);
+    }
+  }
+
+
+
+
+ void dispose() {
           _timer?.cancel();
           _pageController.dispose();
           _qrController.dispose();
@@ -339,53 +363,51 @@ import 'package:flutter/material.dart';
         }
 
         /// CATEGORIES SECTION
-        Widget _categoriesSection() {
-          final List<Map<String, String>> categories = [
-            {"image": "assets/image/mobile.webp", "title": "Mobiles"},
-            {"image": "assets/image/fashion.webp", "title": "Fashion"},
-            {"image": "assets/image/electronic.webp", "title": "Electronics"},
-            {"image": "assets/image/home.webp", "title": "Home"},
-            {"image": "assets/image/beauty.webp", "title": "Beauty"},
-            {"image": "assets/image/books.webp", "title": "books"},
-            {"image": "assets/image/toys.webp", "title": "Toys"},
-          ];
+         Widget _categoriesSection() {
 
-          return SizedBox(
-            height: 110,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: const EdgeInsets.only(right: 15),
-                  child: Column(
-                    children: [
-                      ClipOval(
-                        child: Image.asset(
-                          categories[index]["image"]!,
-                          height: 65,
-                          width: 65,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        categories[index]["title"]!,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+    if (categories.isEmpty) {
+      return const CircularProgressIndicator();
+    }
+
+    return SizedBox(
+      height: 100,
+
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        itemCount: categories.length,
+
+        itemBuilder: (context, index) {
+
+          var cat = categories[index];
+
+          return Container(
+            margin: const EdgeInsets.only(right: 15),
+
+            child: Column(
+              children: [
+
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.orange.shade100,
+                  child: const Icon(Icons.category),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  cat["category_name"] ?? "",
+                  style: const TextStyle(fontSize: 12),
+                )
+
+              ],
             ),
           );
-        }
-
-        Widget _homeKitchenSection() {
+        },
+      ),
+    );
+  }
+  Widget _homeKitchenSection() {
           List<String> images = [
             "assets/image/Banner1.jpg",
             "assets/image/Banner2.webp",
@@ -522,22 +544,19 @@ import 'package:flutter/material.dart';
             ),
           );
         }
+        List categories = [];
 
-        Widget _discoverSection() {
+     Widget _discoverSection() {
           List<String> categories = [
-            "All",
-            "Automotive",
-            "Baby Products",
-            "Beauty",
-            "Books",
-            "Clothing",
-            "Electronics",
-            "Grocery",
-            "Gym & Sports",
-            "Home Decor & Kitchen",
-            "Jewellery",
-            "Luggage",
-            "Luxury Beauty",
+             "All",
+  "Rice & Grains",
+  "Masala",
+  "Pickles",
+  "Papad",
+  "Sweets",
+  "Juices & Syrup",
+  "Utensils",
+  "Ayurvedic",
           ];
 
           List<String> priceFilters = [
@@ -861,8 +880,7 @@ import 'package:flutter/material.dart';
 
      String imageUrl = "";
 if (p['image1'] != null && p['image1'] != "") {
-  imageUrl =
-      "http://192.168.1.39/ecommerce/productgallery/${p['image1']}";
+  imageUrl = "http://192.168.1.39/ecommerce/productgallery/${p['image1']}";
 }
 
      return GestureDetector(
@@ -877,12 +895,15 @@ onTap: () {
     return;
   }
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ProductDetailScreen(productId: productId),
-    ),
-  );
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => ProductDetailScreen(
+  productId: productId,
+  userId: 1,
+),
+  ),
+);
 },
 child: Container(
     padding: const EdgeInsets.all(10),

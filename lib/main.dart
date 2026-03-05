@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         scaffoldBackgroundColor: Colors.grey[100],
       ),
-      home: const MainNavigator(),
+      home: const MainNavigator(userId: 1,),
     );
   }
 }

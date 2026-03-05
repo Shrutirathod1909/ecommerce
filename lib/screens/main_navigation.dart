@@ -6,7 +6,9 @@ import 'catergories_screen.dart';
 
 
 class MainNavigator extends StatefulWidget {
-  const MainNavigator({super.key});
+    final int userId;
+
+  const MainNavigator({super.key, required this.userId});
 
   @override
   State<MainNavigator> createState() => _MainNavigatorState();
@@ -32,7 +34,7 @@ class _MainNavigatorState extends State<MainNavigator> {
     final List<Widget> _screens = [
       const HomeScreen(),
       const ShopcartWelcomeScreen(),
-      const CartScreen(),
+     CartScreen(userId: widget.userId),
       const CategoriesScreen(),
     ];
 
