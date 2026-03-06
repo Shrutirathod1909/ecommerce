@@ -4,9 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'forget_screen.dart';
 
-
 class LoginScreen extends StatefulWidget {
-  final VoidCallback onSuccess; // ✅ Add this
+  final Function(Map<String, dynamic>) onSuccess; // return user data
 
   const LoginScreen({super.key, required this.onSuccess});
 
@@ -38,33 +37,49 @@ class _LoginScreenState extends State<LoginScreen> {
         },
       );
 
-      final data = jsonDecode(response.body);
+      print("Server Response: ${response.body}"); // Debug print
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to connect to server (Status ${response.statusCode})");
+      }
+
+      Map<String, dynamic> data;
+      try {
+        data = jsonDecode(response.body);
+      } catch (e) {
+        throw Exception("Invalid server response: ${response.body}");
+      }
+
       setState(() => isLoading = false);
 
       if (data["status"] == "success") {
-        String userName = data["user"]["fullname"] ?? "";
+        final user = data["user"];
+        String userName = user["fullname"] ?? "User";
+        int userId = user["id"] ?? 0;
 
-        // ✅ Save login state
+        // Save login state
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool("isLoggedIn", true);
-        await prefs.setString("userName", userName);
+        await prefs.setString("username", userName);
+        await prefs.setInt("userid", userId);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login Successful")),
         );
 
-        // ✅ Call onSuccess callback instead of navigating directly
-        widget.onSuccess();
-
+        // Return user data to Welcome/Profile screen
+        widget.onSuccess({"userid": userId, "username": userName});
       } else {
+        // Show server error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["message"] ?? "Login Failed")),
         );
       }
     } catch (e) {
       setState(() => isLoading = false);
+      print("Login Error: $e"); // Debug print
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Server Error")),
+        SnackBar(content: Text("Server Error: $e")),
       );
     }
   }
@@ -131,9 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                        onPressed: () {
-                          setState(() => _obscurePassword = !_obscurePassword);
-                        },
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                   ),

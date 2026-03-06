@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'login_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
+  final Function(Map<String, dynamic>)? onSuccess; // optional callback
+
+  const ForgotPasswordScreen({super.key, this.onSuccess});
+
   @override
-  _ForgotPasswordScreenState createState() =>
-      _ForgotPasswordScreenState();
+  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState
-    extends State<ForgotPasswordScreen> {
-
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final phoneController = TextEditingController();
@@ -18,6 +19,7 @@ class _ForgotPasswordScreenState
 
   bool _obscurePassword = true;
   int step = 1; // 1 = phone, 2 = otp, 3 = reset
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -37,14 +39,13 @@ class _ForgotPasswordScreenState
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           child: Container(
             width: 350,
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(8),
@@ -52,74 +53,48 @@ class _ForgotPasswordScreenState
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  // Logo
-                  Center(
-                    child: Image.asset(
-                      "assets/image/icon.png",
-                      height: 50,
-                    ),
+                  const Center(
+                    child: Icon(Icons.store, size: 50, color: Colors.orange),
                   ),
-                  SizedBox(height: 20),
-
-                  // Title
+                  const SizedBox(height: 20),
                   Text(
                     step == 1
                         ? "Forgot Password"
                         : step == 2
                             ? "Enter OTP"
                             : "Reset Password",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                  // ---------------- STEP 1 ----------------
-                  if (step == 1) ...[
-                    Text("Mobile Number",
-                        style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold)),
-                    SizedBox(height: 5),
-                    TextFormField(
-                      controller: phoneController,
-                      keyboardType:
-                          TextInputType.phone,
+                  // Step 1: Phone Number
+                  if (step == 1)
+                    buildTextField(
+                      "Mobile Number",
+                      phoneController,
+                      keyboard: TextInputType.phone,
                       validator: (value) {
-                        if (value == null ||
-                            value.isEmpty) {
+                        if (value == null || value.isEmpty) {
                           return "Enter mobile number";
                         }
-                        if (value.length < 10) {
-                          return "Enter valid 10 digit number";
+                        if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                          return "Enter valid 10-digit number";
                         }
                         return null;
                       },
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
                     ),
-                  ],
 
-                  // ---------------- STEP 2 ----------------
-                  if (step == 2) ...[
-                    Text("OTP",
-                        style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold)),
-                    SizedBox(height: 5),
-                    TextFormField(
-                      controller: otpController,
-                      keyboardType:
-                          TextInputType.number,
+                  // Step 2: OTP
+                  if (step == 2)
+                    buildTextField(
+                      "OTP",
+                      otpController,
+                      keyboard: TextInputType.number,
                       validator: (value) {
-                        if (value == null ||
-                            value.isEmpty) {
+                        if (value == null || value.isEmpty) {
                           return "Enter OTP";
                         }
                         if (value.length < 4) {
@@ -127,127 +102,85 @@ class _ForgotPasswordScreenState
                         }
                         return null;
                       },
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
                     ),
-                  ],
 
-                  // ---------------- STEP 3 ----------------
-                  if (step == 3) ...[
-                    Text("New Password",
-                        style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold)),
-                    SizedBox(height: 5),
-                    TextFormField(
-                      controller:
-                          newPasswordController,
-                      obscureText:
-                          _obscurePassword,
+                  // Step 3: Reset Password
+                  if (step == 3)
+                    buildPasswordField(
+                      "New Password",
+                      newPasswordController,
+                      _obscurePassword,
+                      () => setState(() => _obscurePassword = !_obscurePassword),
                       validator: (value) {
-                        if (value == null ||
-                            value.isEmpty) {
-                          return "Enter new password";
-                        }
-                        if (value.length < 6) {
-                          return "Minimum 6 characters required";
-                        }
+                        if (value == null || value.isEmpty) return "Enter new password";
+                        if (value.length < 6) return "Minimum 6 characters required";
                         return null;
                       },
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword =
-                                  !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
                     ),
-                  ],
 
-                  SizedBox(height: 25),
+                  const SizedBox(height: 25),
 
-                  // Continue / Reset Button
                   SizedBox(
                     width: double.infinity,
                     height: 45,
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (step < 3) {
-                          nextStep();
-                        } else {
-                          if (_formKey
-                              .currentState!
-                              .validate()) {
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              if (step < 3) {
+                                nextStep();
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Password Reset Successful"),
+                                        backgroundColor: Colors.green),
+                                  );
 
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    "Password Reset Successful"),
-                                backgroundColor:
-                                    Colors.green,
-                              ),
-                            );
+                                  // Call optional onSuccess callback
+                                  widget.onSuccess?.call({"reset": true});
 
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    LoginScreen(  onSuccess: () {},),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      style:
-                          ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Color(0xFFFFC107),
-                        foregroundColor:
-                            Colors.black,
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          LoginScreen(onSuccess: (userData) {
+                                        Navigator.pop(context, userData);
+                                      }),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFC107),
+                        foregroundColor: Colors.black,
                       ),
                       child: Text(
-                        step == 3
-                            ? "Reset Password"
-                            : "Continue",
-                        style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold),
+                        step == 3 ? "Reset Password" : "Continue",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
 
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                  // Back to Login
                   Center(
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                LoginScreen(onSuccess:() {},),
+                            builder: (_) => LoginScreen(onSuccess: (userData) {
+                              Navigator.pop(context, userData);
+                            }),
                           ),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         "Back to Sign-In",
                         style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
+                            color: Colors.blue, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -256,6 +189,56 @@ class _ForgotPasswordScreenState
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Reusable TextField
+  Widget buildTextField(String label, TextEditingController controller,
+      {TextInputType keyboard = TextInputType.text,
+      String? Function(String?)? validator}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 5),
+          TextFormField(
+            controller: controller,
+            keyboardType: keyboard,
+            validator: validator,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Reusable PasswordField
+  Widget buildPasswordField(String label, TextEditingController controller,
+      bool obscure, VoidCallback toggle,
+      {String? Function(String?)? validator}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 5),
+          TextFormField(
+            controller: controller,
+            obscureText: obscure,
+            validator: validator,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                onPressed: toggle,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

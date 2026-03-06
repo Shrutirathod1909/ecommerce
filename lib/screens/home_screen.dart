@@ -1,6 +1,7 @@
       import 'dart:async';
       import 'dart:convert';
       import 'package:app/screens/product_detail_screen.dart';
+import 'package:app/screens/product_screen.dart';
 import 'package:flutter/material.dart';
       import 'package:http/http.dart' as http;
 
@@ -50,6 +51,7 @@ import 'package:flutter/material.dart';
         ];
       List<Map<String, dynamic>> products = [];
         bool isLoadingProducts = true;
+        List categories = [];  
         @override
         void initState() {
           super.initState();
@@ -91,7 +93,7 @@ import 'package:flutter/material.dart';
     
      Future<void> fetchProducts() async {
   try {
-    var url = Uri.parse("http://192.168.1.39/ecommerce/get_product.php"); 
+    var url = Uri.parse("http://192.168.1.39/ecommerce/get_products.php"); 
 
     final response = await http.get(url);
 
@@ -100,13 +102,12 @@ import 'package:flutter/material.dart';
       var data = jsonDecode(response.body);
       print("Decoded JSON: $data");
 
-      if (data['status'] == 'success') {
-        setState(() {
-          products = List<Map<String, dynamic>>.from(data['products']);
-          isLoadingProducts = false;
-        });
-        print("Loaded ${products.length} products");
-      } else {
+    if (data['status'] == true) {
+  setState(() {
+    products = List<Map<String, dynamic>>.from(data['data']);
+    isLoadingProducts = false;
+  });
+ } else {
         setState(() => isLoadingProducts = false);
         print("Status not success");
       }
@@ -118,28 +119,29 @@ import 'package:flutter/material.dart';
     setState(() => isLoadingProducts = false);
     print("Error fetching products: $e");
   }
-}   Future<void> getCategories() async {
+}  
+ Future<void> getCategories() async {
 
-    try {
+  try {
 
-      final response = await http.get(Uri.parse("http://192.168.1.39/ecommerce/get_categories.php"));
+    final response = await http.get(
+      Uri.parse("http://192.168.1.39/ecommerce/get_categories.php")
+    );
 
-      final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body);
 
-      if (data["status"] == "success") {
+    if (data["status"] == true) {
 
-        setState(() {
-          categories = data["categories"];
-        });
+      setState(() {
+        categories = data["data"];   // ✅ correct key
+      });
 
-      }
-
-    } catch (e) {
-      print(e);
     }
+
+  } catch (e) {
+    print(e);
   }
-
-
+}
 
 
  void dispose() {
@@ -363,27 +365,38 @@ import 'package:flutter/material.dart';
         }
 
         /// CATEGORIES SECTION
-         Widget _categoriesSection() {
+    Widget _categoriesSection() {
 
-    if (categories.isEmpty) {
-      return const CircularProgressIndicator();
-    }
+  if (categories.isEmpty) {
+    return const Center(child: CircularProgressIndicator());
+  }
 
-    return SizedBox(
-      height: 100,
+  return SizedBox(
+    height: 100,
+    child: ListView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
 
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        itemCount: categories.length,
+        var cat = categories[index];
+        String subcategory = cat["category_name"] ?? "";
 
-        itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
 
-          var cat = categories[index];
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductScreen(
+                  subcategory: subcategory,
+                ),
+              ),
+            );
 
-          return Container(
+          },
+          child: Container(
             margin: const EdgeInsets.only(right: 15),
-
             child: Column(
               children: [
 
@@ -396,18 +409,19 @@ import 'package:flutter/material.dart';
                 const SizedBox(height: 5),
 
                 Text(
-                  cat["category_name"] ?? "",
+                  subcategory,
                   style: const TextStyle(fontSize: 12),
                 )
 
               ],
             ),
-          );
-        },
-      ),
-    );
-  }
-  Widget _homeKitchenSection() {
+          ),
+        );
+      },
+    ),
+  );
+} 
+Widget _homeKitchenSection() {
           List<String> images = [
             "assets/image/Banner1.jpg",
             "assets/image/Banner2.webp",
@@ -544,20 +558,20 @@ import 'package:flutter/material.dart';
             ),
           );
         }
-        List categories = [];
+       
 
      Widget _discoverSection() {
-          List<String> categories = [
-             "All",
-  "Rice & Grains",
-  "Masala",
-  "Pickles",
-  "Papad",
-  "Sweets",
-  "Juices & Syrup",
-  "Utensils",
-  "Ayurvedic",
-          ];
+         List<String> discoverCategories = [
+ "All",
+ "Digestives",
+ "Dried Fruit",
+ "Dry Fruits",
+ "Fruit Bars",
+ "Fruit Candy",
+ "Roasted Nuts",
+ "Traditional Sweets",
+ "Papad and Fryums"
+];
 
           List<String> priceFilters = [
             "Under ₹299",
@@ -625,7 +639,7 @@ import 'package:flutter/material.dart';
                           child: Wrap(
                             spacing: 10,
                             runSpacing: 10,
-                            children: categories.map((cat) {
+                          children: discoverCategories.map((cat) {
 
                               bool active =
                                   selectedCategories.contains(cat);
@@ -876,36 +890,35 @@ import 'package:flutter/material.dart';
       childAspectRatio: 0.75, // card height control
     ),
     itemBuilder: (context, index) {
-      final p = products[index];
+     final p = products[index];
 
-     String imageUrl = "";
-if (p['image1'] != null && p['image1'] != "") {
-  imageUrl = "http://192.168.1.39/ecommerce/productgallery/${p['image1']}";
+String imageUrl = "";
+if (p['image'] != null && p['image'] != "") {
+  imageUrl =
+      "http://192.168.1.39/ecommerce/productgallery/${p['image']}";
 }
 
-     return GestureDetector(
-onTap: () {
-  print("Clicked: $p");
+return GestureDetector(
+  onTap: () {
 
-  int productId = int.tryParse(p['productid'].toString()) ?? 0;
-  print("Product ID: $productId");
+    int productId = int.tryParse(p['id'].toString()) ?? 0;
 
-  if (productId == 0) {
-    print("❌ Invalid product ID");
-    return;
-  }
+    if (productId == 0) {
+      print("Invalid product ID");
+      return;
+    }
 
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => ProductDetailScreen(
-  productId: productId,
-  userId: 1,
-),
-  ),
-);
-},
-child: Container(
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(
+          productId: productId,
+        ),
+      ),
+    );
+  },
+
+  child: Container(
     padding: const EdgeInsets.all(10),
     decoration: BoxDecoration(
       color: Colors.white,
@@ -914,20 +927,16 @@ child: Container(
         BoxShadow(color: Colors.black12, blurRadius: 5)
       ],
     ),
+
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
 
-        /// IMAGE
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: imageUrl.isNotEmpty
-                ? Image.network(
-                    imageUrl,
-                    width: double.infinity,
-                    fit: BoxFit.contain,
-                  )
+                ? Image.network(imageUrl, fit: BoxFit.contain)
                 : Container(
                     color: Colors.grey[300],
                     child: const Icon(Icons.image),
@@ -937,9 +946,8 @@ child: Container(
 
         const SizedBox(height: 8),
 
-        /// NAME
         Text(
-          p['item_name'] ?? "No Name",
+          p['name'] ?? "",
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
@@ -950,6 +958,6 @@ child: Container(
       ],
     ),
   ),
-);   },
+);  },
   );
 }}

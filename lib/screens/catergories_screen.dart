@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'product_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -28,40 +29,56 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   /// FETCH CATEGORIES
   Future fetchCategories() async {
 
-    var response = await http.get(
-        Uri.parse("$baseUrl/get_categories.php")
-    );
+    try{
 
-    var data = jsonDecode(response.body);
+      var response = await http.get(
+          Uri.parse("$baseUrl/get_categories.php")
+      );
 
-    if(data["status"] == true){
+      var data = jsonDecode(response.body);
 
-      setState(() {
+      if(data["status"] == true){
 
-        categories = data["data"];
-        isLoading = false;
+        setState(() {
 
-      });
+          categories = data["data"];
+          isLoading = false;
 
-      fetchSubcategories(categories[0]["category_name"]);
+        });
+
+        if(categories.isNotEmpty){
+          fetchSubcategories(categories[0]["category_name"]);
+        }
+
+      }
+
+    }catch(e){
+      print(e);
     }
   }
 
   /// FETCH SUBCATEGORIES
   Future fetchSubcategories(String category) async {
 
-    var response = await http.get(
-Uri.parse("$baseUrl/get_subcategories.php?category=$category")    );
+    try{
 
-    var data = jsonDecode(response.body);
+      var response = await http.get(
+          Uri.parse("$baseUrl/get_subcategories.php?category=${Uri.encodeComponent(category)}")
+      );
 
-    if(data["status"] == true){
+      var data = jsonDecode(response.body);
 
-      setState(() {
+      if(data["status"] == true){
 
-        subcategories = data["data"];
+        setState(() {
 
-      });
+          subcategories = data["data"];
+
+        });
+      }
+
+    }catch(e){
+      print(e);
     }
   }
 
@@ -75,44 +92,46 @@ Uri.parse("$baseUrl/get_subcategories.php?category=$category")    );
     }
 
     return Scaffold(
-appBar: AppBar(
-  backgroundColor: const Color(0xffe6b980),
-  elevation: 0,
 
-  title: Container(
-    height: 42,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(30),
-    ),
-    padding: const EdgeInsets.symmetric(horizontal: 12),
+      /// APP BAR
+      appBar: AppBar(
 
-    child: Row(
-      children: const [
-        Icon(Icons.search, color: Colors.black54),
-        SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            "Search or ask a question",
-            style: TextStyle(color: Colors.black54, fontSize: 14),
+        backgroundColor: const Color(0xffe6b980),
+        elevation: 0,
+
+        title: Container(
+          height: 42,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+
+          child: Row(
+            children: const [
+              Icon(Icons.search, color: Colors.black54),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  "Search or ask a question",
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
+                ),
+              ),
+              Icon(Icons.camera_alt_outlined),
+            ],
           ),
         ),
-        Icon(Icons.camera_alt_outlined),
-      ],
-    ),
-  ),
 
-  /// QR SCAN ICON
-  actions: [
-    IconButton(
-      icon: const Icon(Icons.qr_code_scanner, color: Colors.black),
-      onPressed: () {
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner,color: Colors.black),
+            onPressed: () {},
+          )
+        ],
+      ),
 
-        // QR Scan Screen open
-      },
-    )
-  ],
-),  body: Row(
+      /// BODY
+      body: Row(
         children: [
 
           /// LEFT CATEGORY MENU
@@ -136,7 +155,8 @@ appBar: AppBar(
                       selectedIndex = index;
                     });
 
-fetchSubcategories(categories[index]["category_name"]);
+                    fetchSubcategories(categories[index]["category_name"]);
+
                   },
 
                   child: AnimatedContainer(
@@ -204,16 +224,18 @@ fetchSubcategories(categories[index]["category_name"]);
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
+                  /// CATEGORY TITLE
                   Text(
                     categories[selectedIndex]["category_name"],
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
                   const SizedBox(height: 15),
 
+                  /// SUBCATEGORY GRID
                   Expanded(
                     child: GridView.builder(
 
@@ -229,51 +251,66 @@ fetchSubcategories(categories[index]["category_name"]);
 
                       itemBuilder: (context,index){
 
-                        return Column(
+                        return GestureDetector(
 
-                          children: [
+                          onTap: (){
 
-                            Container(
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductScreen(
+                                  subcategory: subcategories[index]["title"],
+                                ),
+                              ),
+                            );
 
-                              height: 60,
-                              width: 60,
+                          },
 
-                              decoration: BoxDecoration(
-                                color: const Color(0xffFAFAFA),
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 5,
-                                    offset: Offset(0,3),
-                                  )
-                                ],
+                          child: Column(
+
+                            children: [
+
+                              Container(
+
+                                height: 60,
+                                width: 60,
+
+                                decoration: BoxDecoration(
+                                  color: const Color(0xffFAFAFA),
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 5,
+                                      offset: Offset(0,3),
+                                    )
+                                  ],
+                                ),
+
+                                child: ClipRRect(
+
+                                  borderRadius: BorderRadius.circular(15),
+
+                                  child: Image.network(
+                                    "$baseUrl/${subcategories[index]["image"]}",
+                                    fit: BoxFit.cover,
+                                  ),
+
+                                ),
                               ),
 
-                              child: ClipRRect(
+                              const SizedBox(height: 6),
 
-                                borderRadius: BorderRadius.circular(15),
+                              Text(
+                                subcategories[index]["title"],
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 11),
+                              )
 
-                                child: Image.network(
-                          "$baseUrl/${subcategories[index]["image"]}",
-                          height: 28,
-                          width: 28,
-                        ),
-
-                              ),
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            Text(
-                              subcategories[index]["title"],
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 11),
-                            )
-
-                          ],
+                            ],
+                          ),
                         );
                       },
                     ),
