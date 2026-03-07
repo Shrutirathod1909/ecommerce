@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:app/screens/auth/login_screen.dart';
 import 'package:app/screens/auth/register_screen.dart';
+import 'package:app/screens/buy_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -186,16 +187,25 @@ class _CartScreenState extends State<CartScreen> {
                               Text("Subtotal ₹${subtotal.toStringAsFixed(2)}",
                                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 10),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.yellow,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
-                                  onPressed: () {},
-                                  child: Text("Proceed to Buy (${cartItems.length} item)"),
-                                ),
-                              )
+                             SizedBox(
+  width: double.infinity,
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.yellow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
+    onPressed: () {
+      if (userId != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CheckoutScreen(),
+          ),
+        );
+      }
+    },
+    child: Text("Proceed to Buy (${cartItems.length} item)"),
+  ),
+),
                             ],
                           ),
                         ),

@@ -99,7 +99,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         "userid": userid.toString(),
         "productid": widget.productId.toString(),
         "quantity": "1",
-        "unit_price": product?["price"]?.toString() ?? "0"
+       "unit_price": product?["price"]?.toString() ?? "0"
       },
     );
 

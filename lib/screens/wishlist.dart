@@ -57,7 +57,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     }
   }
 
-  /// DELETE WISHLIST
+  /// DELETE FROM WISHLIST
   Future deleteWishlist(String productid) async {
 
     var prefs = await SharedPreferences.getInstance();
@@ -82,315 +82,183 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
       backgroundColor: Colors.grey[200],
 
-      /// ================= APPBAR =================
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFDDB07F),
-        elevation: 0,
-        title: Container(
+      /// APPBAR
+    appBar: AppBar(
+  backgroundColor: const Color(0xFFDDB07F),
+  elevation: 0,
+  titleSpacing: 0,
+  title: Row(
+    children: [
+
+      /// SEARCH BOX
+      Expanded(
+        child: Container(
           height: 40,
+          margin: const EdgeInsets.only(left: 10),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const TextField(
-            decoration: InputDecoration(
-              hintText: "Search or ask a question",
-              prefixIcon: Icon(Icons.search),
-              border: InputBorder.none,
-            ),
+
+          child: Row(
+            children: [
+
+              const SizedBox(width: 8),
+
+              const Icon(Icons.search, color: Colors.grey),
+
+              const SizedBox(width: 5),
+
+              const Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: "Search products",
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+
+              /// CAMERA
+              IconButton(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {},
+              ),
+
+              /// MIC
+              IconButton(
+                icon: const Icon(Icons.mic),
+                onPressed: () {},
+              ),
+
+            ],
           ),
         ),
       ),
 
-      /// ================= BODY =================
+      /// QR SCAN OUTSIDE SEARCH
+      IconButton(
+        icon: const Icon(Icons.qr_code_scanner, color: Colors.black),
+        onPressed: () {},
+      ),
+
+    ],
+  ),
+),   /// BODY
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : GridView.builder(
+
+        padding: const EdgeInsets.all(10),
+        itemCount: wishlist.length,
+
+        gridDelegate:
+        const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.70,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+
+        itemBuilder: (context, index) {
+
+          var item = wishlist[index];
+
+          String image =
+              baseImage + (item["image1"] ?? "");
+
+          return GestureDetector(
+
+            onTap: () {
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ProductDetailScreen(
+                        productId: int.parse(
+                            item["productid"].toString()),
+                      ),
+                ),
+              );
+
+            },
+
+            child: Container(
+
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  /// LISTS HEADER
-                  Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          "Lists and Registries",
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
+                  /// IMAGE + HEART
+                  Stack(
+                    children: [
+
+                      SizedBox(
+                        height: 130,
+                        width: double.infinity,
+                        child: Image.network(
+                          image,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.image),
                         ),
-                        CircleAvatar(
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.add),
-                        )
-                      ],
-                    ),
-                  ),
+                      ),
 
-                  /// SHOPPING LIST CARD
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      children: [
-
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.list),
-                                SizedBox(width: 10),
-                                Text("Shopping List")
-                              ],
-                            ),
+                      Positioned(
+                        right: 5,
+                        top: 5,
+                        child: GestureDetector(
+                          onTap: () {
+                            deleteWishlist(
+                                item["productid"]
+                                    .toString());
+                          },
+                          child: const Icon(
+                            Icons.favorite,
+                            color: Colors.red,
                           ),
                         ),
-
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.mic),
-                                SizedBox(width: 10),
-                                Text("Alexa List")
-                              ],
-                            ),
-                          ),
-                        ),
-
-                      ],
-                    ),
+                      )
+                    ],
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 5),
 
-                  /// ALL SAVES HEADER
+                  /// PRODUCT NAME
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          "All saves",
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          "Add item",
-                          style: TextStyle(color: Colors.blue),
-                        )
-                      ],
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8),
+                    child: Text(
+                      item["item_name"] ?? "",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
 
-                  /// FILTER BUTTONS
+                  /// PRICE
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      children: [
-
-                        filterButton("Filters"),
-                        const SizedBox(width: 10),
-                        filterButton("All", active: true),
-                        const SizedBox(width: 10),
-                        filterButton("Deals"),
-                        const SizedBox(width: 10),
-                        filterButton("Trending now"),
-
-                      ],
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8),
+                    child: Text(
+                      "₹${item["price"]}",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
-
-                  /// ================= GRID =================
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(10),
-                    itemCount: wishlist.length,
-
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.65,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-
-                    itemBuilder: (context, index) {
-
-                      var item = wishlist[index];
-
-                      String image =
-                          baseImage + (item["image1"] ?? "");
-
-                      return GestureDetector(
-
-                        onTap: () {
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductDetailScreen(
-                                productId: int.parse(
-                                    item["productid"].toString()),
-                              ),
-                            ),
-                          );
-
-                        },
-
-                        child: Container(
-
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-
-                              /// IMAGE
-                              Stack(
-                                children: [
-
-                                  Container(
-                                    height: 120,
-                                    alignment: Alignment.center,
-                                    child: Image.network(
-                                      image,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const Icon(Icons.image),
-                                    ),
-                                  ),
-
-                                  Positioned(
-                                    right: 5,
-                                    top: 5,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        deleteWishlist(
-                                            item["productid"]
-                                                .toString());
-                                      },
-                                      child: const Icon(
-                                        Icons.favorite,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-
-                              const SizedBox(height: 5),
-
-                              /// NAME
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8),
-                                child: Text(
-                                  item["item_name"] ?? "",
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-
-                              const SizedBox(height: 5),
-
-                              /// PRICE
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8),
-                                child: Text(
-                                  "₹${item["price"]}",
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                              ),
-
-                              const SizedBox(height: 5),
-
-                              const Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 8),
-                                child: Text(
-                                  "Saved in Shopping List",
-                                  style: TextStyle(
-                                      color: Colors.blue),
-                                ),
-                              ),
-
-                              const Spacer(),
-
-                              /// ADD TO CART
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: ElevatedButton(
-
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.yellow,
-                                    minimumSize: const Size(
-                                        double.infinity, 35),
-                                  ),
-
-                                  onPressed: () {},
-
-                                  child: const Text(
-                                    "Add to Cart",
-                                    style: TextStyle(
-                                        color: Colors.black),
-                                  ),
-                                ),
-                              ),
-
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
                 ],
               ),
             ),
-    );
-  }
-
-  Widget filterButton(String text, {bool active = false}) {
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 15, vertical: 8),
-      decoration: BoxDecoration(
-        color: active ? Colors.blue : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-            color: active ? Colors.white : Colors.black),
+          );
+        },
       ),
     );
   }
